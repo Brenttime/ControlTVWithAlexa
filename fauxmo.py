@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 The MIT License (MIT)
 
@@ -36,6 +35,7 @@ import time
 import urllib
 import uuid
 import os
+import subprocess
 
 
 # This XML is the minimum needed to define one of our virtual switches
@@ -123,7 +123,6 @@ class upnp_device(object):
             del(temp_socket)
             dbg("got local address of %s" % upnp_device.this_host_ip)
         return upnp_device.this_host_ip
-        
 
     def __init__(self, listener, poller, port, root_url, server_version, persistent_uuid, other_headers = None, ip_address = None):
         self.listener = listener
@@ -170,7 +169,8 @@ class upnp_device(object):
 
     def get_name(self):
         return "unknown"
-        
+
+
     def respond_to_search(self, destination, search_target):
         dbg("Responding to search for %s" % self.get_name())
         date_str = email.utils.formatdate(timeval=None, localtime=False, usegmt=True)
@@ -387,15 +387,18 @@ class rest_api_handler(object):
 class cec_handler():
     def on(self):
         os.system('echo on 0 | cec-client -s -d 1')
+
+	#This code below switches the input to cable by default (HDMI INPUT 1) which is denoted by the '10' change the '1' to the HDMI input you would
+	# like to start the tv with when powered on.
+        os.system('echo "tx 4F:82:10:00" | cec-client -s > /dev/null')
         return True
 
     def off(self):
         os.system('echo standby 0 | cec-client -s -d 1')
         return True
 
-
 FAUXMOS = [
-    ['tv', cec_handler()],
+    ['tv', cec_handler(), 50001],
 ]
 
 
